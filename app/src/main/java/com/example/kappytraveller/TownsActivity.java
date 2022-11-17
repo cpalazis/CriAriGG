@@ -7,11 +7,25 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.List;
+
 
 public class TownsActivity extends AppCompatActivity {
-    private ArrayList<ImageView> imageCityName = new ArrayList<>();
-    private ArrayList<Button> buttonCityName = new ArrayList<>();
+    private List<ImageView> imageCityName = new ArrayList<>();
+    private List<Button> buttonCityName = new ArrayList<>();
+    private List<String> cityNames = new ArrayList<>();
 
     public TownsActivity() {
     }
@@ -31,49 +45,48 @@ public class TownsActivity extends AppCompatActivity {
         imageCityName.add(findViewById(R.id.imagePopular2));
         imageCityName.add(findViewById(R.id.imagePopular3));
         imageCityName.add(findViewById(R.id.imagePopular4));
-        imageCityName.add(findViewById(R.id.imagePopular5));
 
         buttonCityName.add(findViewById(R.id.buttonPopular1));
         buttonCityName.add(findViewById(R.id.buttonPopular2));
         buttonCityName.add(findViewById(R.id.buttonPopular3));
         buttonCityName.add(findViewById(R.id.buttonPopular4));
-        buttonCityName.add(findViewById(R.id.buttonPopular5));
 
 
-
-
+        citiesResult();
     }
-//    private void getAllSights(){
-//        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-//        ObjectMapper mapper = new ObjectMapper();
-//        OkHttpClient client = new OkHttpClient();
-//        Request request = new Request.Builder()
-//                .url("http://localhost:3000/sights")
-//                .build(); // defaults to GET
-//        Response response = null;
-//        try {
-//            response = client.newCall(request).execute();
-//            JSONObject localResponse = ResponseToJSON(response.body().string());
-//            serializeResponse(localResponse);
-//        } catch (IOException | JSONException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    private void serializeResponse(JSONObject allData) throws JSONException {
-//        JSONObject cities = new JSONObject(allData.get("sights").toString());
-//        JSONArray citiesArray = new JSONArray(cities.get("sights").toString());
-//
-//        for (int i = 0; i<6; i++){
-//            JSONObject singleCity = new JSONObject(citiesArray.get(i).toString());
-//
-//            ArrayList<String> singleCityName = new ArrayList();
-//            singleCityName.add(singleCity.getString("city"));
-//        }
-//    }
-//
-//    private JSONObject ResponseToJSON(String bodyData) throws JSONException {
-//        JSONObject jsonObj = new JSONObject(bodyData.toString());
-//        return jsonObj;
-//    }
+
+    public void citiesResult()  {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest response = new StringRequest(Request.Method.GET, "https://mocki.io/v1/d4867d8b-b5d5-4a48-a4ab-79131b5809b8?fbclid=IwAR0tZoLu2jWWK7gUDZdNw6Sd1aZSiAYq9en4suQqVpdcLTvSnXQyxKQLmW4",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONArray jsonArray = new JSONArray(response);
+                            for (int i = 0; i < jsonArray.length() ; i++){
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                                cityNames.add(jsonObject.getString("city"));
+                            }
+                            displayResults();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }
+
+        );
+        queue.add(response);
+    }
+
+    public  void displayResults(){
+        for(int i = 0; i < cityNames.size(); i++){
+            buttonCityName.get(i).setText(cityNames.get(i));
+        }
+    }
 }
